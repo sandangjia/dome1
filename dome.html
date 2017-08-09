@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        canvas{border:1px solid #ccc;}
+    </style>
+</head>
+<body>
+    <canvas width="600" height="400"></canvas>
+    <script>
+        var c = document.querySelector('canvas');
+        var ctx = c.getContext('2d');
+
+        function getAngle(angle){
+            return Math.PI / 180 * angle;
+        }
+        //获取随机颜色
+        function getColor(){
+            return "rgb("+parseInt(Math.random()*256)+","+parseInt(Math.random()*256)+","+parseInt(Math.random()*256)+")";
+        }
+        /*定义数据*/
+        var data = [
+            {title: "产品经理", count: 900},
+            {title: "前端工程师", count: 800},
+            {title: "美工", count: 1250},
+            {title: "码农", count: 300},
+            {title: "程序员安慰师", count: 200}
+        ];
+
+        //canvas中心点
+        var canvasX = c.width/2;
+        var canvasY = c.height/2;
+        var r = 150;
+        var start = -90;
+        //求和
+        var sum = 0;
+        for(var i=0; i<data.length; i++){
+            sum += data[i].count;
+        }
+        //得到每份数据占的角度
+        var angleArr = data.map(function(value,index,data){
+            return value.count/sum *360;
+        });
+//        console.log(angleArr);
+
+        for(var i=0; i<angleArr.length; i++){
+            //绘制圆
+            {
+                ctx.beginPath();
+                ctx.moveTo(canvasX,canvasY);
+                ctx.arc(canvasX,canvasY,r,getAngle(start),getAngle(start+angleArr[i]));
+                ctx.fillStyle = getColor();
+                ctx.fill();
+            }
+            //绘制线条 (得到线条点)
+            {
+                var x1 = canvasX + Math.cos(Math.PI/180*(start + angleArr[i]/2))*(r+30);
+                var y1 = canvasY + Math.sin(Math.PI/180*(start + angleArr[i]/2))*(r+30);
+
+                //得到文本的宽度
+                var textW = ctx.measureText(data[i].title).width;
+
+                ctx.beginPath();
+                //(起点是圆心的位置  下个点是上面求到线条的)
+                ctx.moveTo(canvasX,canvasY);
+                ctx.lineTo(x1,y1);
+                if(x1 > canvasX){
+                    ctx.lineTo(x1+textW,y1);
+                }else{
+                    ctx.lineTo(x1-textW,y1);
+                    ctx.textAlign = 'right';
+                }
+                //绘制的线条颜色和相对应得颜色相同
+                ctx.strokeStyle = ctx.fillStyle;
+                ctx.stroke();
+
+            }
+            //添加文本
+            {
+                var text = data[i].title;
+                ctx.fillText(text,x1,y1-5);
+            }
+
+            start += angleArr[i];
+        }
+
+    </script>
+</body>
+</html>
